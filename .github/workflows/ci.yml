@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Show files (learning step)
+        run: |
+          pwd
+          ls -la
+
+      - name: Basic HTML checks
+        run: |
+          test -f index.html
+          grep -qi "<h1>" index.html
+          echo "✅ index.html exists and includes an <h1>"
+
+      - name: Fail if TODO is present (example quality gate)
+        run: |
+          if grep -Rni "TODO" .; then
+            echo "❌ Found TODO in repo. Please resolve it."
+            exit 1
+          fi
+          echo "✅ No TODO markers found"
+
