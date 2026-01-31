@@ -12,7 +12,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Deploy to Azure server via SSH
+      - name: Copy site files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          port: ${{ secrets.AZURE_PORT || 22 }}
+          source: "index.html"
+          target: "/home/deployer/deploy_tmp"
+
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AZURE_HOST }}
@@ -21,17 +31,16 @@ jobs:
           port: ${{ secrets.AZURE_PORT || 22 }}
           script: |
             set -e
-            echo "Connected to server: $(hostname)"
-            echo "Deploying to /var/www/myapp"
 
             sudo mkdir -p /var/www/myapp
             sudo chown -R deployer:deployer /var/www/myapp
 
-            cp -f /home/deployer/myapp-repo/index.html /var/www/myapp/index.html
+            cp -f /home/deployer/deploy_tmp/index.html /var/www/myapp/index.html
 
             sudo nginx -t
             sudo systemctl reload nginx
 
-            echo "Deployed files:"
+            echo "Deployment complete"
             ls -la /var/www/myapp
+
 
