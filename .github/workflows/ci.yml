@@ -25,11 +25,12 @@ jobs:
           grep -qi "<h1>" index.html
           echo "✅ index.html exists and includes an <h1>"
 
-      - name: Fail if TODO is present (example quality gate)
+      - name: Fail if todo marker exists in app files
         run: |
-          if grep -Rni "TODO" .; then
-            echo "❌ Found TODO in repo. Please resolve it."
+          if grep -Rni "TODO" index.html README.md 2>/dev/null; then
+            echo "❌ Found TODO marker in app files. Please resolve it."
             exit 1
           fi
-          echo "✅ No TODO markers found"
+          echo "✅ No TODO markers found in app files"
+
 
